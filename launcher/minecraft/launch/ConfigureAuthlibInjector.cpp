@@ -10,7 +10,6 @@
 #include "net/ChecksumValidator.h"
 #include "net/Request.h"
 #include "net/HttpMetaCache.h"
-#include "net/NetAction.h"
 
 ConfigureAuthlibInjector::ConfigureAuthlibInjector(LaunchTask* parent, QString yggdrasil_base_url, std::shared_ptr<QString> javaagent_arg)
     : LaunchStep(parent), m_javaagent_arg{javaagent_arg}, m_yggdrasil_base_url{yggdrasil_base_url}
