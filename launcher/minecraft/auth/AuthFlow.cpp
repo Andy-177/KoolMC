@@ -8,6 +8,7 @@
 #include "minecraft/auth/steps/LauncherLoginStep.h"
 #include "minecraft/auth/steps/MSADeviceCodeStep.h"
 #include "minecraft/auth/steps/MSAStep.h"
+#include "minecraft/auth/steps/YggdrasilAuthStep.h"
 #include "minecraft/auth/steps/MinecraftProfileStep.h"
 #include "minecraft/auth/steps/XboxAuthorizationStep.h"
 #include "minecraft/auth/steps/XboxUserStep.h"
@@ -19,7 +20,9 @@
 
 AuthFlow::AuthFlow(AccountData* data, Action action) : Task(), m_data(data)
 {
-    if (data->type == AccountType::MSA) {
+    if (data->type == AccountType::Yggdrasil) {
+        m_steps.append(makeShared<YggdrasilAuthStep>(m_data, action == Action::Refresh));
+    } else if (data->type == AccountType::MSA) {
         if (action == Action::DeviceCode) {
             auto oauthStep = makeShared<MSADeviceCodeStep>(m_data);
             connect(oauthStep.get(), &MSADeviceCodeStep::authorizeWithBrowser, this, &AuthFlow::authorizeWithBrowserWithExtra);

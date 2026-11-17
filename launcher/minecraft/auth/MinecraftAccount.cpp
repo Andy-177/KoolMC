@@ -89,6 +89,18 @@ MinecraftAccountPtr MinecraftAccount::createOffline(const QString& username)
     return account;
 }
 
+MinecraftAccountPtr MinecraftAccount::createYggdrasil(const QString& server)
+{
+    auto account = makeShared<MinecraftAccount>();
+    account->data.type = AccountType::Yggdrasil;
+    account->data.yggdrasilServer = server;
+    account->data.yggdrasilToken.extra["clientToken"] = QUuid::createUuid().toString(QUuid::Id128);
+    account->data.minecraftEntitlement.ownsMinecraft = true;
+    account->data.minecraftEntitlement.canPlayMinecraft = true;
+    account->data.minecraftEntitlement.validity = Validity::Assumed;
+    return account;
+}
+
 QJsonObject MinecraftAccount::saveToJson() const
 {
     return data.saveState();

@@ -231,6 +231,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/steps/XboxAuthorizationStep.h
     minecraft/auth/steps/XboxUserStep.cpp
     minecraft/auth/steps/XboxUserStep.h
+    minecraft/auth/steps/YggdrasilAuthStep.cpp
+    minecraft/auth/steps/YggdrasilAuthStep.h
 
     minecraft/update/AssetUpdateTask.h
     minecraft/update/AssetUpdateTask.cpp

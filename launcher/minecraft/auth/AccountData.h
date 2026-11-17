@@ -88,7 +88,7 @@ struct MinecraftProfile {
     Validity validity = Validity::None;
 };
 
-enum class AccountType { MSA, Offline };
+enum class AccountType { MSA, Offline, Yggdrasil };
 
 enum class AccountState { Unchecked, Offline, Working, Online, Disabled, Errored, Expired, Gone };
 
@@ -107,6 +107,9 @@ struct AccountData {
     AccountType type = AccountType::MSA;
 
     QString msaClientID;
+
+    //! Base URL of the Yggdrasil authentication server (for third-party accounts).
+    QString yggdrasilServer;
     Token msaToken;
     Token userToken;
     Token mojangservicesToken;
