@@ -245,6 +245,8 @@ set(MINECRAFT_SOURCES
 
     minecraft/launch/ClaimAccount.cpp
     minecraft/launch/ClaimAccount.h
+    minecraft/launch/ConfigureAuthlibInjector.cpp
+    minecraft/launch/ConfigureAuthlibInjector.h
     minecraft/launch/CreateGameFolders.cpp
     minecraft/launch/CreateGameFolders.h
     minecraft/launch/EnsureAvailableMemory.cpp
@@ -1083,6 +1085,8 @@ SET(LAUNCHER_SOURCES
     ui/dialogs/InstallLoaderDialog.h
     ui/dialogs/ChooseOfflineNameDialog.cpp
     ui/dialogs/ChooseOfflineNameDialog.h
+    ui/dialogs/LoginDialog.cpp
+    ui/dialogs/LoginDialog.h
     ui/dialogs/UntrustedModsDialog.cpp
     ui/dialogs/UntrustedModsDialog.h
 

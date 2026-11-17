@@ -45,6 +45,7 @@
 #include <QDebug>
 
 #include "ui/dialogs/ChooseOfflineNameDialog.h"
+#include "ui/dialogs/LoginDialog.h"
 
 #include <QInputDialog>
 #include <QLineEdit>
@@ -161,43 +162,11 @@ void AccountListPage::on_actionAddOffline_triggered()
 
 void AccountListPage::on_actionAddYggdrasil_triggered()
 {
-    bool ok = false;
-    QString server = QInputDialog::getText(this, tr("Add Yggdrasil Account"),
-                                           tr("Yggdrasil server URL:"), QLineEdit::Normal, QString(), &ok);
-    if (!ok || server.trimmed().isEmpty()) {
-        return;
-    }
+    MinecraftAccountPtr account = LoginDialog::newAccount(
+        this, tr("Please enter the Yggdrasil server URL, and enter your account username and password to add your account."),
+        AccountType::Yggdrasil);
 
-    QString username = QInputDialog::getText(this, tr("Add Yggdrasil Account"),
-                                            tr("Username:"), QLineEdit::Normal, QString(), &ok);
-    if (!ok || username.trimmed().isEmpty()) {
-        return;
-    }
-
-    QString password = QInputDialog::getText(this, tr("Add Yggdrasil Account"),
-                                            tr("Password:"), QLineEdit::Password, QString(), &ok);
-    if (!ok) {
-        return;
-    }
-
-    if (const MinecraftAccountPtr account = MinecraftAccount::createYggdrasil(server.trimmed())) {
-        account->accountData()->yggdrasilToken.extra["username"] = username.trimmed();
-        account->accountData()->yggdrasilToken.extra["password"] = password;
-        account->accountData()->yggdrasilToken.extra["userName"] = username.trimmed();
-
-        auto task = account->login();
-        // Synchronously wait for completion (like offline accounts rely on task completing).
-        QEventLoop loop;
-        connect(task.get(), &Task::finished, &loop, &QEventLoop::quit);
-        connect(task.get(), &Task::aborted, &loop, &QEventLoop::quit);
-        loop.exec();
-
-        if (account->accountState() != AccountState::Online) {
-            QMessageBox::warning(this, tr("Error"),
-                                 tr("Failed to log in to the Yggdrasil server: %1").arg(account->lastError()));
-            return;
-        }
-
+    if (account) {
         m_accounts->addAccount(account);
         if (m_accounts->count() == 1) {
             m_accounts->setDefaultAccount(account);

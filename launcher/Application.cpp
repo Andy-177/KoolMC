@@ -1044,6 +1044,7 @@ Application::Application(int& argc, char** argv) : QApplication(argc, argv)
         m_metacache->addBase("ModrinthModpacks", QDir("cache/ModrinthModpacks").absolutePath());
         m_metacache->addBase("translations", QDir("translations").absolutePath());
         m_metacache->addBase("meta", QDir("meta").absolutePath());
+        m_metacache->addBase("authlibinjector", QDir("cache/authlibinjector").absolutePath());
         m_metacache->addBase("java", QDir("cache/java").absolutePath());
         m_metacache->addBase("feed", QDir("cache/feed").absolutePath());
         m_metacache->Load();
