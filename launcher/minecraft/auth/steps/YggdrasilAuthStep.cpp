@@ -1,6 +1,5 @@
 #include "YggdrasilAuthStep.h"
 
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QNetworkRequest>
@@ -29,10 +28,18 @@ static QString normalizeServer(const QString& server)
     return s;
 }
 
+QString YggdrasilAuthStep::baseUrl() const
+{
+    if (!m_data->authlibInjectorApiLocation.isEmpty()) {
+        return normalizeServer(m_data->authlibInjectorApiLocation) + "/authserver";
+    }
+    return normalizeServer(m_data->yggdrasilServer) + "/authserver";
+}
+
 void YggdrasilAuthStep::perform()
 {
-    QString server = normalizeServer(m_data->yggdrasilServer);
-    if (server.isEmpty()) {
+    QString server = baseUrl();
+    if (server.isEmpty() || server == "/authserver") {
         emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Yggdrasil server URL is empty."));
         return;
     }
@@ -46,30 +53,31 @@ void YggdrasilAuthStep::perform()
     QUrl url;
     QByteArray body;
     if (m_refresh && !m_data->yggdrasilToken.token.isEmpty()) {
-        url = QUrl(server + "/authserver/refresh");
-        QJsonObject obj;
-        obj["accessToken"] = m_data->yggdrasilToken.token;
-        obj["clientToken"] = clientToken;
-        if (!m_data->minecraftProfile.id.isEmpty()) {
-            QJsonObject profile;
-            profile["id"] = m_data->minecraftProfile.id;
-            profile["name"] = m_data->minecraftProfile.name;
-            obj["selectedProfile"] = profile;
-        }
-        body = QJsonDocument(obj).toJson(QJsonDocument::Compact);
+        url = QUrl(server + "/refresh");
+        QJsonObject req;
+        req.insert("clientToken", clientToken);
+        req.insert("accessToken", m_data->yggdrasilToken.token);
+        req.insert("requestUser", false);
+        body = QJsonDocument(req).toJson();
     } else {
-        url = QUrl(server + "/authserver/authenticate");
+        url = QUrl(server + "/authenticate");
         QString username = m_data->yggdrasilToken.extra.value("username").toString();
-        QString password = m_data->yggdrasilToken.extra.value("password").toString();
         if (username.isEmpty()) {
             username = m_data->yggdrasilToken.extra.value("userName").toString();
         }
-        QJsonObject obj;
-        obj["username"] = username;
-        obj["password"] = password;
-        obj["clientToken"] = clientToken;
-        obj["requestUser"] = true;
-        body = QJsonDocument(obj).toJson(QJsonDocument::Compact);
+        QString password = m_data->yggdrasilToken.extra.value("password").toString();
+
+        QJsonObject agent;
+        agent.insert("name", QString("Minecraft"));
+        agent.insert("version", 1);
+
+        QJsonObject req;
+        req.insert("agent", agent);
+        req.insert("username", username);
+        req.insert("password", password);
+        req.insert("requestUser", false);
+        req.insert("clientToken", clientToken);
+        body = QJsonDocument(req).toJson();
     }
 
     auto headers = QList<Net::HeaderPair>{
@@ -106,44 +114,57 @@ void YggdrasilAuthStep::onRequestDone(QByteArray* response)
         return;
     }
 
-    QJsonDocument doc = QJsonDocument::fromJson(*response);
-    if (!doc.isObject()) {
-        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Invalid response from Yggdrasil server."));
+    QJsonParseError jsonError;
+    QJsonDocument doc = QJsonDocument::fromJson(*response, &jsonError);
+    if (jsonError.error != QJsonParseError::NoError) {
+        emit finished(AccountTaskState::STATE_FAILED_SOFT,
+                      tr("Failed to parse authentication server response JSON response: %1 at offset %2.")
+                          .arg(jsonError.errorString())
+                          .arg(jsonError.offset));
         return;
     }
-    QJsonObject obj = doc.object();
 
+    QJsonObject obj = doc.object();
     if (obj.contains("error")) {
-        QString err = obj.value("errorMessage").toString();
-        if (err.isEmpty()) {
-            err = obj.value("error").toString();
+        QJsonValue errorVal = obj.value("error");
+        QJsonValue errorMessageValue = obj.value("errorMessage");
+        if (errorVal.isString() && errorMessageValue.isString()) {
+            emit finished(AccountTaskState::STATE_FAILED_HARD, errorMessageValue.toString());
+        } else {
+            emit finished(AccountTaskState::STATE_FAILED_HARD, tr("An unknown Yggdrasil error occurred."));
         }
-        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Yggdrasil error: %1").arg(err));
+        return;
+    }
+
+    QString responseClientToken = obj.value("clientToken").toString();
+    if (responseClientToken.isEmpty()) {
+        emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send a client token."));
+        return;
+    }
+    QString clientToken = m_data->yggdrasilToken.extra.value("clientToken").toString();
+    if (clientToken.isEmpty()) {
+        m_data->yggdrasilToken.extra["clientToken"] = responseClientToken;
+    } else if (clientToken != responseClientToken) {
+        emit finished(AccountTaskState::STATE_FAILED_HARD,
+                      tr("Authentication server attempted to change the client token. This isn't supported."));
         return;
     }
 
     QString accessToken = obj.value("accessToken").toString();
-    QString clientToken = obj.value("clientToken").toString();
-    if (clientToken.isEmpty()) {
-        clientToken = m_data->yggdrasilToken.extra.value("clientToken").toString();
+    if (accessToken.isEmpty()) {
+        emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send an access token."));
+        return;
     }
 
     QJsonObject selectedProfile = obj.value("selectedProfile").toObject();
     if (selectedProfile.isEmpty()) {
-        QJsonArray available = obj.value("availableProfiles").toArray();
-        if (!available.isEmpty() && available.first().isObject()) {
-            selectedProfile = available.first().toObject();
-        }
-    }
-
-    if (accessToken.isEmpty() || selectedProfile.isEmpty()) {
-        emit finished(AccountTaskState::STATE_FAILED_SOFT, tr("Yggdrasil response missing access token or profile."));
+        emit finished(AccountTaskState::STATE_FAILED_HARD, tr("Authentication server didn't send a selected profile."));
         return;
     }
 
     m_data->yggdrasilToken.token = accessToken;
     m_data->yggdrasilToken.refresh_token.clear();
-    m_data->yggdrasilToken.extra["clientToken"] = clientToken;
+    m_data->yggdrasilToken.extra["clientToken"] = responseClientToken;
     m_data->yggdrasilToken.extra.remove("password");
     m_data->yggdrasilToken.issueInstant = QDateTime::currentDateTimeUtc();
     m_data->yggdrasilToken.notAfter = QDateTime::currentDateTimeUtc().addSecs(24 * 3600);

@@ -7,6 +7,7 @@
 #include "minecraft/auth/steps/GetSkinStep.h"
 #include "minecraft/auth/steps/LauncherLoginStep.h"
 #include "minecraft/auth/steps/MSADeviceCodeStep.h"
+#include "minecraft/auth/steps/AuthlibInjectorStep.h"
 #include "minecraft/auth/steps/MSAStep.h"
 #include "minecraft/auth/steps/YggdrasilAuthStep.h"
 #include "minecraft/auth/steps/MinecraftProfileStep.h"
@@ -21,6 +22,7 @@
 AuthFlow::AuthFlow(AccountData* data, Action action) : Task(), m_data(data)
 {
     if (data->type == AccountType::Yggdrasil) {
+        m_steps.append(makeShared<AuthlibInjectorStep>(m_data));
         m_steps.append(makeShared<YggdrasilAuthStep>(m_data, action == Action::Refresh));
     } else if (data->type == AccountType::MSA) {
         if (action == Action::DeviceCode) {

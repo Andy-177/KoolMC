@@ -110,6 +110,9 @@ struct AccountData {
 
     //! Base URL of the Yggdrasil authentication server (for third-party accounts).
     QString yggdrasilServer;
+
+    //! Resolved API location (runtime only; from x-authlib-injector-api-location header).
+    QString authlibInjectorApiLocation;
     Token msaToken;
     Token userToken;
     Token mojangservicesToken;

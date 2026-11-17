@@ -20,6 +20,7 @@ private slots:
 
 private:
     bool m_refresh;
+    QString baseUrl() const;
     Net::Request::Ptr m_request;
     NetJob::Ptr m_task;
 };

@@ -215,6 +215,8 @@ set(MINECRAFT_SOURCES
     minecraft/auth/AuthFlow.cpp
     minecraft/auth/AuthFlow.h
 
+    minecraft/auth/steps/AuthlibInjectorStep.cpp
+    minecraft/auth/steps/AuthlibInjectorStep.h
     minecraft/auth/steps/EntitlementsStep.cpp
     minecraft/auth/steps/EntitlementsStep.h
     minecraft/auth/steps/GetSkinStep.cpp
