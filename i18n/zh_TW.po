@@ -108,7 +108,7 @@ msgid "Message label placeholder."
 msgstr "訊息標籤預留位置。"
 
 msgctxt "AccountListPage"
-msgid "Add Yggdrasil Account (&Y)"
+msgid "Add &Yggdrasil"
 msgstr "新增Yggdrasil帳戶(&Y)"
 
 msgctxt "AccountListPage"
