@@ -97,7 +97,7 @@
   </action>
   <action name="actionAddYggdrasil">
    <property name="text">
-    <string>Add &amp;Yggdrasil</string>
+    <string>Add Yggdrasil Account (&amp;Y)</string>
    </property>
   </action>
   <action name="actionRefresh">

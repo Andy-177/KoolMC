@@ -108,8 +108,8 @@ msgid "Message label placeholder."
 msgstr "訊息標籤預留位置。"
 
 msgctxt "AccountListPage"
-msgid "Add &Yggdrasil"
-msgstr "新增 &Yggdrasil"
+msgid "Add Yggdrasil Account (&Y)"
+msgstr "新增Yggdrasil帳戶(&Y)"
 
 msgctxt "AccountListPage"
 msgid "Please enter the Yggdrasil server URL, and enter your account username and password to add your account."
