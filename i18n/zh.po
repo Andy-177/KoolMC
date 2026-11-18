@@ -119,18 +119,10 @@ msgctxt "AccountList|Account type"
 msgid "Yggdrasil"
 msgstr "Yggdrasil"
 
-msgctxt "QDialogButtonBox"
-msgid "&OK"
-msgstr "确认"
-
-msgctxt "QDialogButtonBox"
+msgctxt "LoginDialog"
 msgid "OK"
 msgstr "确认"
 
-msgctxt "QDialogButtonBox"
-msgid "&Cancel"
-msgstr "取消"
-
-msgctxt "QDialogButtonBox"
+msgctxt "LoginDialog"
 msgid "Cancel"
 msgstr "取消"
