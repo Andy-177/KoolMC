@@ -118,3 +118,19 @@ msgstr "請輸入 Yggdrasil 伺服器位址，並輸入帳號使用者名稱和�
 msgctxt "AccountList|Account type"
 msgid "Yggdrasil"
 msgstr "Yggdrasil"
+
+msgctxt "QDialogButtonBox"
+msgid "&OK"
+msgstr "確認"
+
+msgctxt "QDialogButtonBox"
+msgid "OK"
+msgstr "確認"
+
+msgctxt "QDialogButtonBox"
+msgid "&Cancel"
+msgstr "取消"
+
+msgctxt "QDialogButtonBox"
+msgid "Cancel"
+msgstr "取消"
